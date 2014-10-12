@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/quarterto/qsh/issues"
   },
-  "homepage": "https://github.com/quarterto/qsh"
+  "homepage": "https://github.com/quarterto/qsh",
+  "dependencies": {
+    "highland": "^2.0.0",
+    "path-executables": "^1.0.0"
+  }
 }
