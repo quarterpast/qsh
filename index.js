@@ -51,13 +51,20 @@ var vm = require('vm');
 function repl() {
 	var i = rl.createInterface(process.stdin, process.stdout);
 	function prompt() {
-		i.setPrompt('$ ');
+		i.setPrompt('$ ', 2);
+		rl.clearLine(process.stdout, 1);
 		i.prompt();
 	}
 	wrapAll(pathExecutables(process.env.PATH.split(':'))).apply(function(ctx) {
 		i.on('line', function(line) {
-			var cmd = vm.runInNewContext(line, ctx);
-			cmd(process.stdin).pipe(process.stdout).on('end', prompt);
+			if(line.trim()) {
+				try {
+					var cmd = vm.runInNewContext(line, ctx);
+					cmd(process.stdin).pipe(process.stdout).on('end', prompt);
+				} catch(e) {
+					console.log(e);
+				}
+			} else prompt();
 		});
 		prompt();
 	});
