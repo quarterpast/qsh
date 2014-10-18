@@ -31,13 +31,13 @@ function wrapExecutable(path) {
 				stdin.pipe(sub.stdin);
 			});
 			return sub.stdout;
-		}
-	}
+		};
+	};
 }
 
 var pathExecutables = function(p) {
 	return σ(p).flatFilter(exists).map(readdir).flatten();
-}
+};
 
 var wrapAll = σ.reduce({}, function(obj, ex) {
 	var base = path.basename(ex);
@@ -45,8 +45,22 @@ var wrapAll = σ.reduce({}, function(obj, ex) {
 	return obj;
 });
 
-wrapAll(pathExecutables(process.env.PATH.split(':')))
-.apply(function(a) {
-	a.ls([])(σ([])).pipe(process.stdout);
-});
+var rl = require('readline');
+var vm = require('vm');
 
+function repl() {
+	var i = rl.createInterface(process.stdin, process.stdout);
+	function prompt() {
+		i.setPrompt('$ ');
+		i.prompt();
+	}
+	wrapAll(pathExecutables(process.env.PATH.split(':'))).apply(function(ctx) {
+		i.on('line', function(line) {
+			var cmd = vm.runInNewContext(line, ctx);
+			cmd(process.stdin).pipe(process.stdout).on('end', prompt);
+		});
+		prompt();
+	});
+}
+
+repl();
